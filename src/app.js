@@ -9,7 +9,8 @@ import passport from 'passport';
 import initializePassport from './config/passport.config.js';
 import config from './config/config.js';
 import { addLogger } from './config/logger.js';
-
+import database from './config/mogo-Singleton.js'
+ 
 
 //Routers a importar:
 import studentRouter from './routes/students.router.js'
@@ -25,6 +26,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+
+
 /**
  * Template engine
  */
@@ -38,6 +41,7 @@ app.use(cookieParser("CoderS3cr3tC0d3"));
 //Inicializar passport:
 initializePassport();
 app.use(passport.initialize());
+app.use(addLogger);
 
 //Declaración de Routers:
 app.use('/',viewsRouter);
@@ -46,18 +50,25 @@ app.use("/api/courses", coursesRouter);
 app.use("/users", usersViewRouter);
 app.use("/api/jwt", jwtRouter);
 
+console.log(config.port)
+console.log(config.mongoUrl)
+
 const SERVER_PORT = config.port;
 app.listen(SERVER_PORT, () => {
+
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });
 
-const connectMongoDB = async ()=>{
-    try {
-        await mongoose.connect(config.mongoUrl);
-        console.log("Conectado con exito a MongoDB usando Moongose.");
-    } catch (error) {
-        console.error("No se pudo conectar a la BD usando Moongose: " + error);
-        process.exit();
-    }
-};
-connectMongoDB();
+
+database.connect();
+
+// const connectMongoDB = async ()=>{
+//     try {
+//         await mongoose.connect(config.mongoUrl);
+//         console.log("Conectado con exito a MongoDB usando Moongose.");
+//     } catch (error) {
+//         console.error("No se pudo conectar a la BD usando Moongose: " + error);
+//         process.exit();
+//     }
+// };
+// connectMongoDB();
